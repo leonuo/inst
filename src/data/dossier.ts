@@ -54,13 +54,21 @@ export const evidenceLedger = [
       "Instagram account-managers converge on three execution topologies (local automation, vendor-hosted, hybrid) and a three-way auth separation (app-user / license / IG session). The dossier below maps that model and states exactly what evidence adjudicates each branch.",
     citation: "Class-level knowledge · explicitly not findings from this repo",
   },
+  {
+    id: "C-05",
+    stamp: "CONFIRMED" as StampKind,
+    title: "Operator field test: freezes were update-driven; the startup banner now breaks launch",
+    detail:
+      "Post-D-01 field report: hangs are gone — the freezes correlated with the service update cycle, so D-01 is validated in production. New confirmed symptom: a banner appears at startup and breaks the whole system and build. First direct evidence in this case; the banner subsystem is removed by decision D-02.",
+    citation: "Operator field report · post-D-01 test",
+  },
 ];
 
 export const situationStats = [
   { label: "Public files inventoried", value: 0, suffix: "" },
   { label: "Active hypotheses", value: 4, suffix: "" },
-  { label: "Root causes closed by D-01", value: 3, suffix: "" },
-  { label: "Baseline confidence", value: 0, suffix: "", text: "LOW" },
+  { label: "Root causes closed by decisions", value: 4, suffix: "" },
+  { label: "Case confidence", value: 0, suffix: "", text: "RISING" },
 ];
 
 export const consoleLines = [
@@ -73,6 +81,9 @@ export const consoleLines = [
   { ts: "09:14:07Z", level: "PLAN", msg: "Registering 7 ranked root-cause hypotheses for symptom cluster [crash · freeze · stop · broken feature]" },
   { ts: "09:41:12Z", level: "CASE", msg: "Operator decision D-01 received: auto-update subsystem broke the system repeatedly → decommission it entirely" },
   { ts: "09:41:12Z", level: "PLAN", msg: "Applying D-01: RC-2 / RC-6 / RC-7 closed · registry reduced to 4 active hypotheses · dossier REV 0.2" },
+  { ts: "10:02:47Z", level: "CASE", msg: "Operator field test: hangs gone — freezes correlated with the service update cycle → D-01 validated in production" },
+  { ts: "10:02:48Z", level: "CASE", msg: "New confirmed symptom: startup banner breaks the whole system and build at launch → operator decision D-02: remove the banner subsystem" },
+  { ts: "10:02:49Z", level: "PLAN", msg: "Applying D-02: RC-8 (banner blocks initialization) registered and closed · startup must land directly on workspace · dossier REV 0.3" },
   { ts: "09:14:08Z", level: "GATE", msg: "Case gated on materials: source archive OR installer+versions, sanitized logs, dated failure samples" },
   { ts: "09:14:08Z", level: "SYS", msg: "Dossier compiled · awaiting operator input ▌" },
 ];
@@ -94,7 +105,7 @@ export const topologies: Record<
   A: {
     name: "Local automation client",
     tag: "TOPOLOGY A",
-    desc: "All Instagram operations execute on the operator's machine. The client embeds a browser engine or calls IG private endpoints directly; the vendor server (if any) only serves licensing, config and updates.",
+    desc: "All Instagram operations execute on the operator's machine. The client embeds a browser engine or calls IG private endpoints directly; the vendor server (if any) only serves licensing and config — update distribution removed by D-01.",
     points: [
       "Egress to i.instagram.com / scontent CDNs originates from the client host (via configured proxies)",
       "Typical engines: CEF, WebView2, Electron, Playwright/WebDriver, or raw HTTP with app-signature emulation",
@@ -271,25 +282,55 @@ export const licenseLifecycle = [
   { state: "BLOCKED", note: "UI gate / worker kill. If kill is non-transactional → RC-1 corruption", tone: "red" },
 ];
 
-export const decision = {
-  id: "D-01",
-  title: "Auto-update subsystem — removed, not repaired",
-  basis:
-    "Operator decision on REV 0.1: updates proved to be the dominant regression vector (former RC-2, RC-6, RC-7) and the forced-update cycle kept breaking a working system. The subsystem is decommissioned outright: the build is frozen, distribution goes manual, and drift fixes move to a config feed.",
-  closed: ["RC-2", "RC-6", "RC-7"],
-  guardrails: [
-    "License validation, activation and device binding stay intact — this decision touches distribution, not licensing",
-    "Instagram session handling and per-account proxy isolation are out of scope and unchanged",
-    "IG fingerprint / endpoint drift is patched out-of-band via the config feed, never through a full release (RC-3)",
-  ],
-  checklist: [
-    { id: "D1", text: "Freeze the current stable build as the baseline; archive it with SHA-256 next to every prior build for rollback.", artifacts: ["HASHES", "ARCHIVE"] },
-    { id: "D2", text: "Remove the update-check loop and patcher/updater module from the build; without source access, block the update-feed host at network level as the interim control.", artifacts: ["BUILD", "HOSTBLOCK"] },
-    { id: "D3", text: "Snapshot appdata read-only before the change; verify the session store stays byte-stable across restarts afterward.", artifacts: ["APPDATA", "DIFF"] },
-    { id: "D4", text: "24h soak: zero traffic to the update feed; the license heartbeat remains the only vendor call.", artifacts: ["PCAP"] },
-    { id: "D5", text: "Move IG app-version / user-agent / endpoint pins into a versioned config feed with an N-1 acceptance window.", artifacts: ["PATCH", "TESTS"] },
-  ],
+export type Decision = {
+  id: string;
+  title: string;
+  basis: string;
+  closed: string[];
+  guardrails: string[];
+  checklist: { id: string; text: string; artifacts: string[] }[];
 };
+
+export const decisions: Decision[] = [
+  {
+    id: "D-01",
+    title: "Auto-update subsystem — removed",
+    basis:
+      "Operator decision on REV 0.1: updates proved to be the dominant regression vector (former RC-2, RC-6, RC-7) and the forced-update cycle kept breaking a working system. The subsystem is decommissioned outright: the build is frozen, distribution goes manual, and drift fixes move to a config feed. Field-validated in the post-D-01 test — hangs are gone.",
+    closed: ["RC-2", "RC-6", "RC-7"],
+    guardrails: [
+      "License validation, activation and device binding stay intact — this decision touches distribution, not licensing",
+      "Instagram session handling and per-account proxy isolation are out of scope and unchanged",
+      "IG fingerprint / endpoint drift is patched out-of-band via the config feed, never through a full release (RC-3)",
+    ],
+    checklist: [
+      { id: "D1", text: "Freeze the current stable build as the baseline; archive it with SHA-256 next to every prior build for rollback.", artifacts: ["HASHES", "ARCHIVE"] },
+      { id: "D2", text: "Remove the update-check loop and patcher/updater module from the build; without source access, block the update-feed host at network level as the interim control.", artifacts: ["BUILD", "HOSTBLOCK"] },
+      { id: "D3", text: "Snapshot appdata read-only before the change; verify the session store stays byte-stable across restarts afterward.", artifacts: ["APPDATA", "DIFF"] },
+      { id: "D4", text: "24h soak: zero traffic to the update feed; the license heartbeat remains the only vendor call.", artifacts: ["PCAP"] },
+      { id: "D5", text: "Move IG app-version / user-agent / endpoint pins into a versioned config feed with an N-1 acceptance window.", artifacts: ["PATCH", "TESTS"] },
+    ],
+  },
+  {
+    id: "D-02",
+    title: "Startup banner subsystem — removed",
+    basis:
+      "Operator field test on REV 0.2: the banner that appears at launch breaks the whole system and the build — the app is unusable from the first second. The freezes are already resolved by D-01; the remaining launch-time blocker is the banner itself, so it is decommissioned outright: no announcement, changelog or onboarding modal at startup — the app lands directly on the workspace.",
+    closed: ["RC-8"],
+    guardrails: [
+      "License prompts and 2FA / checkpoint dialogs stay — they are functional gates, not banners; only the startup announcement layer is removed",
+      "If the banner doubled as the vendor's changelog or legal-notice channel, that content moves out-of-band (docs site or config feed)",
+      "IG session handling, proxy isolation and the license gate are out of scope and unchanged",
+    ],
+    checklist: [
+      { id: "B1", text: "Locate the banner subsystem in the frozen build: strings/resources for the banner host, markup or remote-template loader, and its call site in the startup path.", artifacts: ["STRINGS", "FILELIST"] },
+      { id: "B2", text: "Remove the banner module or its startup invocation; without source access, block the banner/announcement host at network level as the interim control.", artifacts: ["BUILD", "HOSTBLOCK"] },
+      { id: "B3", text: "Cold-start verification: launch must land on the workspace with no modal, no focus trap, and no blocking network fetch on the UI thread.", artifacts: ["COLDSTART", "THREADDUMP"] },
+      { id: "B4", text: "Regression pass: license prompt, 2FA / checkpoint dialogs and worker startup still function with the banner gone.", artifacts: ["TESTS"] },
+      { id: "B5", text: "24h soak across restarts: zero banner-host traffic; startup time before/after is the acceptance metric.", artifacts: ["PCAP"] },
+    ],
+  },
+];
 
 /* ---------- Section 04 · root-cause registry ---------- */
 
@@ -344,7 +385,7 @@ export const rootCauses: RootCause[] = [
     title: "UI-thread deadlock: license prompt × challenge modal × worker join",
     symptom: "Hard freeze (UI unresponsive) especially when a license warning coincides with a 2FA/checkpoint prompt.",
     mechanism:
-      "Worker thread holds a lock and waits for the UI to present a challenge; UI thread is blocked joining the worker or rendering a license dialog on the same dispatcher. Classic two-lock inversion; only a restart releases it.",
+      "Worker thread holds a lock and waits for the UI to present a challenge; UI thread is blocked joining the worker or rendering a license dialog on the same dispatcher. Classic two-lock inversion; only a restart releases it. The startup banner was a third modal contender in this exact race — removed by D-02.",
     confirm:
       "Thread dump (ProcDump / stack capture) during the freeze shows the circular wait: UI thread in Join/WaitFor, worker blocked on a UI-dispatch call.",
     reject:
@@ -375,7 +416,11 @@ export const rootCauses: RootCause[] = [
 /* RC-2 (update migrates/resets the session store), RC-6 (post-update proxy
    isolation regression) and RC-7 (update alters device fingerprint) were
    closed by decision D-01: the auto-update subsystem is removed, so their
-   trigger no longer exists. Original IDs are kept retired for traceability. */
+   trigger no longer exists. RC-8 (startup banner blocks initialization —
+   remote-fetched announcement modal on the UI thread / focus trap before
+   the main loop is ready; symptom confirmed by the operator field test)
+   was registered and immediately closed by decision D-02: the banner
+   subsystem is removed. Original IDs are kept retired for traceability. */
 
 /* ---------- Section 05 · debugging plan ---------- */
 
@@ -411,7 +456,7 @@ export const debugPlan: PlanPhase[] = [
     goal: "Recreate each symptom in a sandbox with test accounts only.",
     steps: [
       { id: "S-09", text: "License-outage drill: block license host, run a long task, document worker exit path and state coherence (RC-1).", artifacts: ["HOSTBLOCK", "LOGS"] },
-      { id: "S-10", text: "Freeze drill (D-01): disable the update feed on a sandbox copy, run a long task, verify zero update-feed traffic and a byte-stable appdata across restarts.", artifacts: ["HOSTBLOCK", "DIFF"] },
+      { id: "S-10", text: "Freeze drill (D-01) + cold-start check (D-02): disable the update and banner hosts on a sandbox copy, run a long task, verify zero traffic to either host, byte-stable appdata across restarts, and launch landing directly on the workspace.", artifacts: ["HOSTBLOCK", "DIFF", "COLDSTART"] },
       { id: "S-11", text: "IG-rejection probe: replay one failing action via intercepting proxy; record response class per build (RC-3).", artifacts: ["MITM-CAPTURE"] },
       { id: "S-12", text: "Isolation probe: two profiles × two proxies, identical actions, compare per-profile egress IPs before/after the freeze (egress audit per D-01).", artifacts: ["EGRESSLOG"] },
     ],
@@ -431,7 +476,7 @@ export const debugPlan: PlanPhase[] = [
     goal: "Fix defects without touching licensing or auth controls.",
     steps: [
       { id: "S-15", text: "Transactional worker stop at task boundaries; WAL/journal recovery; challenge queueing (RC-1/4).", artifacts: ["PATCH"] },
-      { id: "S-16", text: "Strip the updater: remove the update-check loop and patcher from the build, block the update-feed host, keep the license gate untouched; fingerprint values move to the config feed (RC-3 · D-01).", artifacts: ["BUILD", "PATCH"] },
+      { id: "S-16", text: "Strip the updater and the banner: remove the update-check loop, patcher and startup-banner module from the build, block both hosts, keep the license gate untouched; fingerprint values move to the config feed (RC-3 · D-01/D-02).", artifacts: ["BUILD", "PATCH"] },
       { id: "S-17", text: "Backoff/jitter/circuit-breaker on all remote calls; per-action egress audit log (RC-5); regression matrix on the frozen build.", artifacts: ["PATCH", "TESTS"] },
     ],
   },
@@ -447,6 +492,7 @@ export const openQuestions = [
   "Do failures follow license errors or IG-side events (checkpoint emails, action blocks)? Any one dated correlation narrows the registry immediately.",
   "Who operates the vendor/license server, and is vendor status history available (outages, endpoint migrations) around the failure dates?",
   "Confirm authorization: is this analysis performed by or for the rights holder of the software and the accounts involved? The plan proceeds only under explicit authorization.",
+  "What exactly was the startup banner (vendor announcement, changelog modal, license nag)? A screenshot or its host/markup confirms the D-02 removal has no side effects — e.g., that it was not also serving a legal notice.",
 ];
 
 export const confidenceLegend: { kind: StampKind; meaning: string }[] = [

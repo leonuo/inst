@@ -12,7 +12,8 @@ import {
   rootCauses,
   situationStats,
   topologies,
-  decision,
+  decisions,
+  type Decision,
   type MatrixRow,
   type TopologyId,
 } from "./data/dossier";
@@ -48,6 +49,58 @@ const TONE: Record<string, string> = {
 
 const today = new Date().toISOString().slice(0, 10);
 const totalSteps = debugPlan.reduce((a, p) => a + p.steps.length, 0);
+
+function DecisionCard({ d }: { d: Decision }) {
+  const accent = d.id === "D-02" ? TONE.red : TONE.warm;
+  return (
+    <div className="panel corner-frame p-6 h-full border-l-2" style={{ borderLeftColor: accent }}>
+      <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
+        <div>
+          <div className="tick-label" style={{ color: accent }}>
+            {d.id} · DECISION RECORD
+          </div>
+          <div className="font-display font-semibold text-lg mt-1 leading-snug">{d.title}</div>
+        </div>
+        <Stamp kind="DECISION" />
+      </div>
+      <p className="text-[13px] leading-relaxed text-ink/90">{d.basis}</p>
+      <div className="mt-4 flex items-center gap-2 flex-wrap font-mono text-[10.5px]">
+        <span className="text-faint tracking-[0.18em]">CLOSED:</span>
+        {d.closed.map((c) => (
+          <span key={c} className="px-2 py-0.5 border border-line2 text-mut line-through decoration-red/70">
+            {c}
+          </span>
+        ))}
+      </div>
+      <div className="mt-4 space-y-1.5">
+        {d.guardrails.map((g) => (
+          <div key={g} className="flex gap-2.5 text-[12px] leading-relaxed text-mut">
+            <span className="font-mono text-grn shrink-0">■</span>
+            <span>{g}</span>
+          </div>
+        ))}
+      </div>
+      <div className="tick-label mt-5 mb-3">DECOMMISSION CHECKLIST</div>
+      <ol className="space-y-3">
+        {d.checklist.map((c) => (
+          <li key={c.id} className="flex items-start gap-3">
+            <span className="font-mono text-[11px] w-7 shrink-0 mt-0.5" style={{ color: accent }}>
+              {c.id}
+            </span>
+            <div className="flex-1">
+              <p className="text-[12.5px] leading-relaxed text-ink/85">{c.text}</p>
+              <div className="mt-1.5 flex gap-1.5 flex-wrap">
+                {c.artifacts.map((a) => (
+                  <ArtifactChip key={a} label={a} />
+                ))}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
 
 export default function App() {
   const [topo, setTopo] = useState<TopologyId>("A");
@@ -98,7 +151,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-2 flex items-center justify-between gap-4 font-mono text-[10px] tracking-[0.28em] text-faint">
           <span className="text-amb/90">▲ AUTHORIZED ANALYSIS · READ-ONLY PRESERVATION</span>
           <span className="hidden sm:block">CASE IAX-04 · SUBJECT: leonuo/InstAccountsManager</span>
-          <span>REV 0.2 · D-01 APPLIED · {today}</span>
+          <span>REV 0.3 · D-01 + D-02 APPLIED · {today}</span>
         </div>
       </div>
 
@@ -144,7 +197,7 @@ export default function App() {
                     <Scramble text="Manager" delay={650} />
                   </span>
                   <span className="block mt-4 text-lg sm:text-xl font-medium text-mut tracking-normal">
-                    failure investigation dossier · licensing × account operations · D-01 applied
+                    failure investigation dossier · licensing × account operations · D-01 + D-02 applied
                   </span>
                 </h1>
               </Reveal>
@@ -154,7 +207,7 @@ export default function App() {
                   {[
                     ["SUBJECT", "leonuo/InstAccountsManager"],
                     ["SYMPTOMS", "crash · freeze · stop · broken"],
-                    ["STATUS", "awaiting materials"],
+                    ["STATUS", "D-02 applied · field data in"],
                   ].map(([k, v]) => (
                     <div key={k} className="bg-panel px-4 py-3">
                       <div className="tick-label mb-1">{k}</div>
@@ -175,8 +228,9 @@ export default function App() {
                   What a senior pass <em className="text-ink not-italic">can</em> establish right now: the three
                   candidate execution topologies for this software class, the three-way separation of authentication
                   domains where license failures leak into Instagram sessions, and a ranked register of four active
-                  root-cause hypotheses — the three update-driven causes are closed by decision D-01 — each with the
-                  exact observation that would confirm or reject it, plus a seventeen-step evidence plan.
+                  root-cause hypotheses — the update-driven causes are closed by D-01, the startup-banner cause by
+                  D-02 — each with the exact observation that would confirm or reject it, plus a seventeen-step
+                  evidence plan.
                 </p>
               </Reveal>
 
@@ -464,54 +518,16 @@ export default function App() {
               </div>
             </Reveal>
             <Reveal delay={110}>
-              <div className="panel corner-frame p-6 h-full border-l-2" style={{ borderLeftColor: TONE.warm }}>
-                <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
-                  <div className="tick-label" style={{ color: TONE.warm }}>
-                    {decision.id} · DECISION RECORD — UPDATE SUBSYSTEM REMOVED
-                  </div>
-                  <Stamp kind="DECISION" />
-                </div>
-                <p className="text-[13px] leading-relaxed text-ink/90">{decision.basis}</p>
-                <div className="mt-4 flex items-center gap-2 flex-wrap font-mono text-[10.5px]">
-                  <span className="text-faint tracking-[0.18em]">CLOSED:</span>
-                  {decision.closed.map((c) => (
-                    <span key={c} className="px-2 py-0.5 border border-line2 text-mut line-through decoration-red/70">
-                      {c}
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-4 space-y-1.5">
-                  {decision.guardrails.map((g) => (
-                    <div key={g} className="flex gap-2.5 text-[12px] leading-relaxed text-mut">
-                      <span className="font-mono text-grn shrink-0">■</span>
-                      <span>{g}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="tick-label mt-5 mb-3">DECOMMISSION CHECKLIST</div>
-                <ol className="space-y-3">
-                  {decision.checklist.map((c) => (
-                    <li key={c.id} className="flex items-start gap-3">
-                      <span className="font-mono text-[11px] w-7 shrink-0 mt-0.5" style={{ color: TONE.warm }}>
-                        {c.id}
-                      </span>
-                      <div className="flex-1">
-                        <p className="text-[12.5px] leading-relaxed text-ink/85">{c.text}</p>
-                        <div className="mt-1.5 flex gap-1.5 flex-wrap">
-                          {c.artifacts.map((a) => (
-                            <ArtifactChip key={a} label={a} />
-                          ))}
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </div>
+              <DecisionCard d={decisions[0]} />
             </Reveal>
           </div>
 
-          <Reveal delay={140}>
-            <div className="mt-6 panel corner-frame px-6 py-5 border-l-2" style={{ borderLeftColor: TONE.red }}>
+          <div className="grid lg:grid-cols-2 gap-6 mt-6">
+            <Reveal delay={140}>
+              <DecisionCard d={decisions[1]} />
+            </Reveal>
+            <Reveal delay={170}>
+              <div className="panel corner-frame px-6 py-5 border-l-2 h-full" style={{ borderLeftColor: TONE.red }}>
               <div className="tick-label mb-3 text-red/90">THE SIGNATURE CASCADE — HOW A LICENSING BUG BECOMES AN INSTAGRAM PROBLEM</div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[11.5px] text-ink/90">
                 {[
@@ -534,8 +550,9 @@ export default function App() {
                 materials arrive. The update-driven variants (RC-2/6/7) no longer apply: the update subsystem is
                 removed by D-01.
               </p>
-            </div>
-          </Reveal>
+              </div>
+            </Reveal>
+          </div>
         </section>
 
         {/* ================= SEC 04 · ROOT CAUSES ================= */}
@@ -545,7 +562,7 @@ export default function App() {
             kicker="ROOT-CAUSE REGISTRY"
             title="Four active hypotheses — each falsifiable by design"
             stamp="HYPOTHESIS"
-            note="Ranked by prevalence in this software class and fit to the reported symptom cluster (crash · freeze · unexpected stop · broken feature after licensing events). Update-driven causes RC-2/6/7 are closed by decision D-01. A hypothesis is only useful if it states what would kill it."
+            note="Ranked by prevalence in this software class and fit to the reported symptom cluster (crash · freeze · unexpected stop · broken feature after licensing events). Update-driven RC-2/6/7 are closed by D-01; the startup-banner cause RC-8 is closed by D-02. A hypothesis is only useful if it states what would kill it."
           />
           <div className="space-y-3">
             {rootCauses.map((rc, i) => {
@@ -600,21 +617,32 @@ export default function App() {
           </div>
           <Reveal delay={140}>
             <div
-              className="mt-5 panel px-5 py-4 flex items-center gap-4 flex-wrap border-l-2"
+              className="mt-5 panel px-5 py-4 flex flex-col gap-3 border-l-2"
               style={{ borderLeftColor: TONE.warm }}
             >
-              <Stamp kind="DECISION" />
-              <span className="font-mono text-[11px] text-mut leading-relaxed">
-                <span className="text-faint tracking-[0.18em]">RETIRED BY D-01 · </span>
-                {["RC-2 update resets session store", "RC-6 post-update proxy regression", "RC-7 update alters HWID"].map(
-                  (c) => (
-                    <span key={c} className="line-through decoration-red/70 text-mut/80 mr-4">
-                      {c}
-                    </span>
-                  )
-                )}
-                <span className="text-mut">— trigger removed, IDs kept for traceability</span>
-              </span>
+              <div className="flex items-center gap-4 flex-wrap">
+                <Stamp kind="DECISION" />
+                <span className="font-mono text-[11px] text-mut leading-relaxed">
+                  <span className="text-faint tracking-[0.18em]">RETIRED BY D-01 · </span>
+                  {["RC-2 update resets session store", "RC-6 post-update proxy regression", "RC-7 update alters HWID"].map(
+                    (c) => (
+                      <span key={c} className="line-through decoration-red/70 text-mut/80 mr-4">
+                        {c}
+                      </span>
+                    )
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 flex-wrap">
+                <Stamp kind="DECISION" />
+                <span className="font-mono text-[11px] text-mut leading-relaxed">
+                  <span className="text-faint tracking-[0.18em]">RETIRED BY D-02 · </span>
+                  <span className="line-through decoration-red/70 text-mut/80 mr-4">
+                    RC-8 startup banner blocks initialization
+                  </span>
+                  <span className="text-mut">— triggers removed, IDs kept for traceability</span>
+                </span>
+              </div>
             </div>
           </Reveal>
         </section>
@@ -701,7 +729,7 @@ export default function App() {
           <SectionHead
             index="06"
             kicker="OPEN QUESTIONS → REQUESTER"
-            title="Seven questions that unblock the case"
+            title="Eight questions that unblock the case"
             stamp="UNKNOWN"
             note="Asked only because the missing information prevents meaningful progress — each maps to a phase gate in SEC 05."
           />
