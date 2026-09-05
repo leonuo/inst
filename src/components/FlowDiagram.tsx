@@ -197,7 +197,7 @@ export default function FlowDiagram({ topo }: { topo: TopologyId }) {
         w={192}
         h={120}
         title="VENDOR CLOUD"
-        lines={["license server", "api / task queue ?", "update feed"]}
+        lines={["license server", "api / task queue ?", "config feed (D-01)"]}
         tone="#f2b64c"
         active={involved.vendor}
       />

@@ -16,7 +16,8 @@ export type StampKind =
   | "APP-LEVEL"
   | "P1"
   | "P2"
-  | "P3";
+  | "P3"
+  | "DECISION";
 
 /* ---------- Section 00 · situation / evidence ledger ---------- */
 
@@ -57,8 +58,8 @@ export const evidenceLedger = [
 
 export const situationStats = [
   { label: "Public files inventoried", value: 0, suffix: "" },
-  { label: "Working hypotheses registered", value: 7, suffix: "" },
-  { label: "Evidence artifacts required", value: 14, suffix: "" },
+  { label: "Active hypotheses", value: 4, suffix: "" },
+  { label: "Root causes closed by D-01", value: 3, suffix: "" },
   { label: "Baseline confidence", value: 0, suffix: "", text: "LOW" },
 ];
 
@@ -68,8 +69,10 @@ export const consoleLines = [
   { ts: "09:14:05Z", level: "NET", msg: "GET api.github.com/.../git/trees/main?recursive=1 → unreachable (429 upstream) · branch enumeration blocked" },
   { ts: "09:14:06Z", level: "CASE", msg: "Source availability: NONE at supplied URL → repo is private / renamed / deleted / mistyped" },
   { ts: "09:14:06Z", level: "RULE", msg: "Directive applied: do not invent code-level findings → all internals labeled HYPOTHESIS" },
-  { ts: "09:14:07Z", level: "PLAN", msg: "Loading class-level reference model: 3 execution topologies × 3 auth domains × update pipeline" },
+  { ts: "09:14:07Z", level: "PLAN", msg: "Loading class-level reference model: 3 execution topologies × 3 auth domains" },
   { ts: "09:14:07Z", level: "PLAN", msg: "Registering 7 ranked root-cause hypotheses for symptom cluster [crash · freeze · stop · broken feature]" },
+  { ts: "09:41:12Z", level: "CASE", msg: "Operator decision D-01 received: auto-update subsystem broke the system repeatedly → decommission it entirely" },
+  { ts: "09:41:12Z", level: "PLAN", msg: "Applying D-01: RC-2 / RC-6 / RC-7 closed · registry reduced to 4 active hypotheses · dossier REV 0.2" },
   { ts: "09:14:08Z", level: "GATE", msg: "Case gated on materials: source archive OR installer+versions, sanitized logs, dated failure samples" },
   { ts: "09:14:08Z", level: "SYS", msg: "Dossier compiled · awaiting operator input ▌" },
 ];
@@ -120,7 +123,7 @@ export const topologies: Record<
       "Client→IG bursts at login/challenge; vendor→IG steady traffic during bulk windows",
       "Cookie/session sync endpoint is the highest-value target for the evidence capture",
       "Inconsistent state bugs (\"account logged out after license error\") cluster at the sync boundary",
-      "Update regressions often hit only one half — e.g. local client version vs server contract",
+      "With the updater removed (D-01), client↔server contract skew must be managed via the out-of-band config feed",
     ],
     verdict: "Adjudicate by phase: tag every connection with the app phase active when it fired.",
   },
@@ -161,8 +164,8 @@ export const featureMatrix: MatrixRow[] = [
     exec: "LOCAL",
     protocol: "Cookie jar: sessionid, ds_user_id · device appstate file (candidate)",
     authDep: "Local disk · optional DPAPI/keychain",
-    failCoupling: "Update resets/migrates store → forced re-login wave; unclean exit corrupts DB",
-    adjudicate: "FSMON on appdata across an update (AJ-3)",
+    failCoupling: "Unclean worker exit corrupts the store → forced re-login wave (update vector removed by D-01)",
+    adjudicate: "FSMON on appdata across restarts (AJ-3)",
     coupling: 3,
   },
   {
@@ -188,7 +191,7 @@ export const featureMatrix: MatrixRow[] = [
     exec: "LOCAL",
     protocol: "rupload_igphoto / rupload_igvideo (candidate)",
     authDep: "Session + media pipeline",
-    failCoupling: "Upload endpoint drift after update breaks silently",
+    failCoupling: "IG-side endpoint drift breaks uploads silently — patch via config feed, not releases (D-01)",
     adjudicate: "Capture during one upload",
     coupling: 2,
   },
@@ -211,15 +214,6 @@ export const featureMatrix: MatrixRow[] = [
     coupling: 3,
   },
   {
-    feature: "Auto-update",
-    exec: "APP-LEVEL",
-    protocol: "Vendor update feed · installer / in-app patcher (candidate)",
-    authDep: "Usually none, or app token",
-    failCoupling: "Unsigned/partial patch, config schema migration, device-ID reset",
-    adjudicate: "Sandboxed update run + file DIFF",
-    coupling: 3,
-  },
-  {
     feature: "Proxy & isolation management",
     exec: "LOCAL",
     protocol: "SOCKS5/HTTP per account profile (candidate)",
@@ -232,7 +226,7 @@ export const featureMatrix: MatrixRow[] = [
 
 export const matrixFilters = ["ALL", "LOCAL", "SERVER", "HYBRID", "APP-LEVEL"] as const;
 
-/* ---------- Section 03 · three auth domains, license lifecycle, update pipeline ---------- */
+/* ---------- Section 03 · three auth domains, license lifecycle, decision D-01 ---------- */
 
 export const authDomains = [
   {
@@ -253,7 +247,7 @@ export const authDomains = [
     facts: [
       "Activation binds a machine fingerprint (HWID: SMBIOS UUID, MAC, disk serial — typical)",
       "Periodic heartbeat with offline grace window is the common design; width of grace is decisive",
-      "Update can change the fingerprint input set → same machine reads as new device → invalidation",
+      "Any rebuild/reinstall can change fingerprint inputs → same machine reads as new device; pin the algorithm and persist the device token (D-01)",
     ],
     failure: "Heartbeat failing during a task: does the worker flush state and stop, or die mid-write? This is RC-1.",
   },
@@ -277,13 +271,25 @@ export const licenseLifecycle = [
   { state: "BLOCKED", note: "UI gate / worker kill. If kill is non-transactional → RC-1 corruption", tone: "red" },
 ];
 
-export const updatePipeline = [
-  { stage: "CHECK", risk: "Version feed returns a broken channel build; rollback availability unknown" },
-  { stage: "DOWNLOAD", risk: "Partial / resumed download without integrity re-check → corrupted binaries or config" },
-  { stage: "VERIFY", risk: "Signature / hash verification present? Unverified patch = prime regression vector" },
-  { stage: "INSTALL", risk: "Overwrites settings, resets HWID inputs, replaces local DB without migration" },
-  { stage: "MIGRATE", risk: "Config/schema version mismatch: old session store unreadable → mass re-login" },
-];
+export const decision = {
+  id: "D-01",
+  title: "Auto-update subsystem — removed, not repaired",
+  basis:
+    "Operator decision on REV 0.1: updates proved to be the dominant regression vector (former RC-2, RC-6, RC-7) and the forced-update cycle kept breaking a working system. The subsystem is decommissioned outright: the build is frozen, distribution goes manual, and drift fixes move to a config feed.",
+  closed: ["RC-2", "RC-6", "RC-7"],
+  guardrails: [
+    "License validation, activation and device binding stay intact — this decision touches distribution, not licensing",
+    "Instagram session handling and per-account proxy isolation are out of scope and unchanged",
+    "IG fingerprint / endpoint drift is patched out-of-band via the config feed, never through a full release (RC-3)",
+  ],
+  checklist: [
+    { id: "D1", text: "Freeze the current stable build as the baseline; archive it with SHA-256 next to every prior build for rollback.", artifacts: ["HASHES", "ARCHIVE"] },
+    { id: "D2", text: "Remove the update-check loop and patcher/updater module from the build; without source access, block the update-feed host at network level as the interim control.", artifacts: ["BUILD", "HOSTBLOCK"] },
+    { id: "D3", text: "Snapshot appdata read-only before the change; verify the session store stays byte-stable across restarts afterward.", artifacts: ["APPDATA", "DIFF"] },
+    { id: "D4", text: "24h soak: zero traffic to the update feed; the license heartbeat remains the only vendor call.", artifacts: ["PCAP"] },
+    { id: "D5", text: "Move IG app-version / user-agent / endpoint pins into a versioned config feed with an N-1 acceptance window.", artifacts: ["PATCH", "TESTS"] },
+  ],
+};
 
 /* ---------- Section 04 · root-cause registry ---------- */
 
@@ -306,7 +312,7 @@ export const rootCauses: RootCause[] = [
     title: "License kill-switch terminates workers without state flush",
     symptom: "Unexpected stops + \"broken\" accounts after license errors; tasks vanish mid-run.",
     mechanism:
-      "A failed heartbeat (expired key, unreachable server, post-update HWID change) triggers process/worker termination that is not transactional: task DB left mid-write, session checkpoint half-committed, in-memory queues dropped.",
+      "A failed heartbeat (expired key, unreachable server, HWID change after a manual reinstall) triggers process/worker termination that is not transactional: task DB left mid-write, session checkpoint half-committed, in-memory queues dropped.",
     confirm:
       "Logs showing worker SIGKILL/abort within seconds of a license 4xx/timeout; DB journal/WAL present or torn writes; task state file newer than last commit.",
     reject:
@@ -315,22 +321,6 @@ export const rootCauses: RootCause[] = [
       "Sandbox copy + test account. Start a long bulk task, block the license host via OS hosts-file, observe worker exit path and reopen the app: is task state coherent?",
     fix:
       "Legitimate: make license verdicts advisory at task boundaries — flush + commit before honoring a stop; queue challenges instead of killing threads; add journal/WAL recovery on start.",
-  },
-  {
-    id: "RC-2",
-    priority: "P1",
-    title: "Update migrates or resets local session/config store incorrectly",
-    symptom: "After updating: accounts \"logged out\", settings reverted, features dead until reinstall.",
-    mechanism:
-      "New build expects config schema vN+1; migration missing or order-wrong → loader falls back to defaults, or the installer overwrites the appdata directory. Device-fingerprint inputs change, secondarily invalidating the license (feeds RC-1).",
-    confirm:
-      "Before/after DIFF of the appdata directory shows session store replaced/zeroed or schema_version bumped with data loss; installer log shows an overwrite step.",
-    reject:
-      "Update in sandbox leaves session store byte-identical (or cleanly migrated) and sessions survive.",
-    repro:
-      "Snapshot appdata (read-only copy), run the updater on a sandbox copy, diff trees; then launch and check whether sessions load without re-login.",
-    fix:
-      "Restore migration path or roll forward: versioned schema with tested migrations, atomic rename installs, never delete unknown files in appdata.",
   },
   {
     id: "RC-3",
@@ -380,39 +370,12 @@ export const rootCauses: RootCause[] = [
     fix:
       "Exponential backoff + jitter + attempt cap + circuit breaker; fail the task loudly instead of silently spinning.",
   },
-  {
-    id: "RC-6",
-    priority: "P2",
-    title: "Post-update proxy/isolation regression cross-contaminates accounts",
-    symptom: "Accounts stop or checkpoint in waves after an update; not all accounts, and it follows proxy groups.",
-    mechanism:
-      "An update changes how the per-account proxy binding is applied (e.g., connection pooling shared across accounts, DNS leak, or proxy auth dropped). IG sees N accounts from one IP → coordinated restriction.",
-    confirm:
-      "Egress-IP log shows multiple account profiles exiting from the same address after the update; pre-update capture shows clean separation.",
-    reject:
-      "Per-account egress IPs remain unique and stable across the update boundary.",
-    repro:
-      "Two test profiles, two distinct proxies; run identical actions before/after update; compare egress IPs per profile.",
-    fix:
-      "Bind proxy at socket level per profile; disable shared connection pools across profiles; log egress IP per action for auditability.",
-  },
-  {
-    id: "RC-7",
-    priority: "P3",
-    title: "Update alters device fingerprint → license re-activation mid-task",
-    symptom: "Immediately after updating, the app demands re-activation; running tasks die (interacts with RC-1).",
-    mechanism:
-      "HWID computation inputs changed (new SDK, new hash of disk/MAC/SMBIOS, or appdata reset from RC-2 removed the stored device token). License server treats the machine as new; activation cap or manual re-activation interrupts work in progress.",
-    confirm:
-      "License request payload differs only in the device identifier across the update; vendor panel shows a \"new device\" event at the update timestamp.",
-    reject:
-      "Device identifier stable across the update; license state transitions correlate with key expiry instead.",
-    repro:
-      "Capture the license request (sanitized structure only) pre- and post-update in sandbox; diff the fingerprint field set.",
-    fix:
-      "Persist device token outside the paths an installer may reset; version the fingerprint algorithm and accept N-1 during transition.",
-  },
 ];
+
+/* RC-2 (update migrates/resets the session store), RC-6 (post-update proxy
+   isolation regression) and RC-7 (update alters device fingerprint) were
+   closed by decision D-01: the auto-update subsystem is removed, so their
+   trigger no longer exists. Original IDs are kept retired for traceability. */
 
 /* ---------- Section 05 · debugging plan ---------- */
 
@@ -426,7 +389,7 @@ export const debugPlan: PlanPhase[] = [
     goal: "Unblock the case: get authorized materials and preserve originals read-only.",
     steps: [
       { id: "S-01", text: "Obtain authorized access: private-repo read grant or source archive at the exact working and broken commits; record hashes.", artifacts: ["SOURCE", "HASHES"] },
-      { id: "S-02", text: "Collect installer + installed binaries for one known-good and one known-bad version.", artifacts: ["BIN-GOOD", "BIN-BAD"] },
+      { id: "S-02", text: "Collect the installer + installed binary of the build being frozen as the baseline, plus the last known-bad build for comparison.", artifacts: ["BIN-GOOD", "BIN-BAD"] },
       { id: "S-03", text: "Snapshot the appdata directory (config, DB, session store) read-only, redacting cookies/tokens/keys before analysis.", artifacts: ["APPDATA", "REDACTED"] },
       { id: "S-04", text: "Gather dated failure samples: app logs, crash dumps, vendor support thread, screenshots with clock visible.", artifacts: ["LOGS", "DUMPS"] },
     ],
@@ -437,7 +400,7 @@ export const debugPlan: PlanPhase[] = [
     goal: "Establish who talks to whom without changing anything.",
     steps: [
       { id: "S-05", text: "Capture DNS + connection metadata during login and one task; classify hosts: vendor / IG-edge / Graph / CDN (AJ-1).", artifacts: ["PCAP", "DNSLOG"] },
-      { id: "S-06", text: "Filesystem monitor on appdata during login/task/update: locate session persistence and license state files (AJ-3).", artifacts: ["FSMON"] },
+      { id: "S-06", text: "Filesystem monitor on appdata during login/task/restart: locate session persistence and license state files (AJ-3).", artifacts: ["FSMON"] },
       { id: "S-07", text: "At the next freeze, capture thread stacks (ProcDump or platform equivalent) before killing the process (RC-4).", artifacts: ["THREADDUMP"] },
       { id: "S-08", text: "Static pass on binaries: strings for endpoint literals, app-id/UA pins, engine artifacts (CEF/Electron/WebDriver) (AJ-2/4).", artifacts: ["STRINGS"] },
     ],
@@ -448,9 +411,9 @@ export const debugPlan: PlanPhase[] = [
     goal: "Recreate each symptom in a sandbox with test accounts only.",
     steps: [
       { id: "S-09", text: "License-outage drill: block license host, run a long task, document worker exit path and state coherence (RC-1).", artifacts: ["HOSTBLOCK", "LOGS"] },
-      { id: "S-10", text: "Update drill on a sandbox copy: appdata DIFF before/after, session survival check, license request structure diff (RC-2/7).", artifacts: ["DIFF", "LICENSE-REQ"] },
+      { id: "S-10", text: "Freeze drill (D-01): disable the update feed on a sandbox copy, run a long task, verify zero update-feed traffic and a byte-stable appdata across restarts.", artifacts: ["HOSTBLOCK", "DIFF"] },
       { id: "S-11", text: "IG-rejection probe: replay one failing action via intercepting proxy; record response class per build (RC-3).", artifacts: ["MITM-CAPTURE"] },
-      { id: "S-12", text: "Isolation probe: two profiles × two proxies, identical actions, compare per-profile egress IPs pre/post update (RC-6).", artifacts: ["EGRESSLOG"] },
+      { id: "S-12", text: "Isolation probe: two profiles × two proxies, identical actions, compare per-profile egress IPs before/after the freeze (egress audit per D-01).", artifacts: ["EGRESSLOG"] },
     ],
   },
   {
@@ -458,7 +421,7 @@ export const debugPlan: PlanPhase[] = [
     name: "Adjudication",
     goal: "Promote or reject every hypothesis with recorded evidence.",
     steps: [
-      { id: "S-13", text: "For each RC-1…7: file the confirm/reject evidence, set confidence to CONFIRMED / REJECTED / STILL-UNKNOWN.", artifacts: ["VERDICTS"] },
+      { id: "S-13", text: "For active RC-1/3/4/5: file the confirm/reject evidence, set confidence to CONFIRMED / REJECTED / STILL-UNKNOWN; record RC-2/6/7 as closed by D-01.", artifacts: ["VERDICTS"] },
       { id: "S-14", text: "Produce the final request-flow map with verified edges only; mark residual unknowns explicitly.", artifacts: ["FLOWMAP-V2"] },
     ],
   },
@@ -468,8 +431,8 @@ export const debugPlan: PlanPhase[] = [
     goal: "Fix defects without touching licensing or auth controls.",
     steps: [
       { id: "S-15", text: "Transactional worker stop at task boundaries; WAL/journal recovery; challenge queueing (RC-1/4).", artifacts: ["PATCH"] },
-      { id: "S-16", text: "Versioned config migrations + atomic installs; fingerprint algorithm versioning with N-1 acceptance (RC-2/7).", artifacts: ["PATCH"] },
-      { id: "S-17", text: "Backoff/jitter/circuit-breaker on all remote calls; per-action egress audit log (RC-5/6); regression matrix on both builds.", artifacts: ["PATCH", "TESTS"] },
+      { id: "S-16", text: "Strip the updater: remove the update-check loop and patcher from the build, block the update-feed host, keep the license gate untouched; fingerprint values move to the config feed (RC-3 · D-01).", artifacts: ["BUILD", "PATCH"] },
+      { id: "S-17", text: "Backoff/jitter/circuit-breaker on all remote calls; per-action egress audit log (RC-5); regression matrix on the frozen build.", artifacts: ["PATCH", "TESTS"] },
     ],
   },
 ];
@@ -478,10 +441,10 @@ export const debugPlan: PlanPhase[] = [
 
 export const openQuestions = [
   "Is the repository private? A read-only grant (or an archive at the exact working and broken commits) is the single highest-value unblock — without it every internal claim stays HYPOTHESIS.",
-  "Which versions are affected? One known-good and one known-bad build (installer or binaries) plus the update path between them.",
+  "Which build is frozen as the stable baseline (D-01)? Record its SHA-256 and archive every prior build so rollback never depends on the vendor feed.",
   "What platform and framework is the client (Windows/macOS, native vs Electron/CEF/.NET)? This selects the whole toolchain for triage.",
   "Can you supply logs or crash dumps from an actual failure, with timestamps and (redacted) license state at that moment?",
-  "Do failures follow license errors, updates, or IG-side events (checkpoint emails, action blocks)? Any one dated correlation narrows the registry immediately.",
+  "Do failures follow license errors or IG-side events (checkpoint emails, action blocks)? Any one dated correlation narrows the registry immediately.",
   "Who operates the vendor/license server, and is vendor status history available (outages, endpoint migrations) around the failure dates?",
   "Confirm authorization: is this analysis performed by or for the rights holder of the software and the accounts involved? The plan proceeds only under explicit authorization.",
 ];

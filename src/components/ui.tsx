@@ -126,6 +126,7 @@ const STAMP_TONES: Record<StampKind, string> = {
   P1: "#f0685f",
   P2: "#f2b64c",
   P3: "#4cc3e8",
+  DECISION: "#e8c58a",
 };
 
 export function Stamp({ kind, dim = false }: { kind: StampKind; dim?: boolean }) {
