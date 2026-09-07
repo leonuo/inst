@@ -6,7 +6,6 @@ import {
   debugPlan,
   evidenceLedger,
   featureMatrix,
-  licenseLifecycle,
   matrixFilters,
   openQuestions,
   rootCauses,
@@ -227,7 +226,7 @@ export default function App() {
                 <p className="mt-4 text-[15px] leading-relaxed text-mut max-w-2xl">
                   What a senior pass <em className="text-ink not-italic">can</em> establish right now: the three
                   candidate execution topologies for this software class, the three-way separation of authentication
-                  domains where license failures leak into Instagram sessions, and a ranked register of four active
+                  domains where failures leak into Instagram sessions, and a ranked register of four active
                   root-cause hypotheses — the update-driven causes are closed by D-01, the startup-banner cause by
                   D-02 — each with the exact observation that would confirm or reject it, plus a seventeen-step
                   evidence plan.
@@ -320,7 +319,7 @@ export default function App() {
                       <span className="inline-block w-6 h-0 border-t-2 border-cyn" /> verified-candidate data path
                     </span>
                     <span className="flex items-center gap-2">
-                      <span className="inline-block w-6 h-0 border-t border-dashed border-amb" /> license / config / sync
+                      <span className="inline-block w-6 h-0 border-t border-dashed border-amb" /> config / sync
                     </span>
                     <span className="flex items-center gap-2">
                       <span className="inline-block w-6 h-0 border-t-2 border-grn" /> login & warm-up phase
@@ -459,7 +458,7 @@ export default function App() {
             kicker="AUTH × LICENSING × INSTAGRAM SESSIONS"
             title="Three auth domains — and the cascades that couple them"
             stamp="HYPOTHESIS"
-            note="App-user tokens, license verdicts, and Instagram sessions are independent by design. Crashes 'after license errors' almost always mean the client is coupling them: a license failure killing workers that own IG session state."
+            note="Instagram sessions are independent by design. Crashes 'after errors' almost always mean the client is coupling them: a failure killing workers that own IG session state."
           />
 
           <div className="space-y-4">
@@ -492,31 +491,7 @@ export default function App() {
             ))}
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6 mt-8">
-            <Reveal>
-              <div className="panel p-6 h-full">
-                <div className="tick-label mb-5">LICENSE LIFECYCLE — STATES TO OBSERVE</div>
-                <div className="space-y-0">
-                  {licenseLifecycle.map((s, i) => (
-                    <div key={s.state} className="flex items-stretch gap-4">
-                      <div className="flex flex-col items-center">
-                        <span
-                          className="w-3 h-3 rounded-full border-2 shrink-0"
-                          style={{ borderColor: TONE[s.tone], background: `${TONE[s.tone]}33` }}
-                        />
-                        {i < licenseLifecycle.length - 1 && <span className="w-px flex-1 bg-line" />}
-                      </div>
-                      <div className="pb-6">
-                        <div className="font-display font-semibold tracking-wide" style={{ color: TONE[s.tone] }}>
-                          {s.state}
-                        </div>
-                        <p className="text-[12.5px] text-mut mt-1 leading-relaxed">{s.note}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
+          <div className="mt-8">
             <Reveal delay={110}>
               <DecisionCard d={decisions[0]} />
             </Reveal>
@@ -531,7 +506,7 @@ export default function App() {
               <div className="tick-label mb-3 text-red/90">THE SIGNATURE CASCADE — HOW A LICENSING BUG BECOMES AN INSTAGRAM PROBLEM</div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[11.5px] text-ink/90">
                 {[
-                  "license heartbeat fails",
+                  "worker heartbeat fails",
                   "worker killed mid-task",
                   "session store torn write",
                   "account appears logged out",
@@ -792,7 +767,7 @@ export default function App() {
           <div>
             <div className="tick-label mb-4">SCOPE & ETHICS</div>
             <p className="text-[12.5px] text-mut leading-relaxed">
-              This dossier supports authorized debugging of a licensed product. It proposes no bypass of
+              This dossier supports authorized debugging of a product. It proposes no bypass of
               authentication or licensing controls — fixes target transactional state handling, migrations, backoff
               and observability. Instagram-side testing uses test accounts only, and class-level references are never
               presented as findings from the subject codebase.

@@ -58,7 +58,7 @@ const EDGES: Edge[] = [
   {
     id: "cv",
     d: "M 348 346 C 402 382 432 388 484 386",
-    label: "license · config · sync",
+    label: "config · sync",
     lx: 352,
     ly: 404,
     states: { A: "warm", B: "hot", C: "warm" },
@@ -186,7 +186,7 @@ export default function FlowDiagram({ topo }: { topo: TopologyId }) {
         w={210}
         h={178}
         title="CLIENT APP"
-        lines={["workers · queues", "browser engine ?", "local session store", "license gate"]}
+        lines={["workers · queues", "browser engine ?", "local session store"]}
         tone="#4cc3e8"
         active={involved.client}
       />
@@ -197,7 +197,7 @@ export default function FlowDiagram({ topo }: { topo: TopologyId }) {
         w={192}
         h={120}
         title="VENDOR CLOUD"
-        lines={["license server", "api / task queue ?", "config feed (D-01)"]}
+        lines={["api / task queue ?", "config feed (D-01)"]}
         tone="#f2b64c"
         active={involved.vendor}
       />
