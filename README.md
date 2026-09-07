@@ -1,98 +1,218 @@
-# InstAccountsManager Investigation Dossier
+# 🛠️ InstAccountsManager - Fixed Version (No License/Update)
 
-Веб-досьє з результатами розслідування InstAccountsManager.
+## 📌 Про цей репозиторій
 
-## 🚀 Швидкий старт
+Це **виправлена версія** InstAccountsManager з видаленими:
+- ❌ License validation
+- ❌ Auto-update (Updater.exe)
+- ❌ Startup banner
 
-### Вимоги
-- **Node.js** версії 18 або вище
-- **npm** версії 8 або више
+**Оригінальний репозиторій:** https://github.com/leonuo/InstAccountsManager
 
-### Встановлення залежностей
+---
 
-```bash
-npm install
-```
+## ⚠️ ВАЖЛИВО: Перед встановленням
 
-### Запуск у режимі розробки
+Цей репозиторій містить **скрипти виправлення**, але **НЕ містить оригінальні бінарні файли**.
 
-```bash
-npm run dev
-```
+### 📥 Крок 1: Завантажте оригінальні файли
 
-Програма відкриється на **http://localhost:3000**
+1. Відкрийте https://github.com/leonuo/InstAccountsManager
+2. Натисніть **"Code"** → **"Download ZIP"**
+3. Розпакуйте архів
+4. Скопіюйте **ВСІ файли** в цю папку
 
-### Створення продакшн-білду
-
-```bash
-npm run build
-```
-
-Готові файли будуть у папці `dist/`
-
-### Перегляд продакшн-білду локально
-
-```bash
-npm run preview
-```
-
-## 📋 Доступні команди
-
-| Команда | Опис |
-|---------|------|
-| `npm run dev` | Запуск dev сервера з hot reload (порт 3000) |
-| `npm run build` | Створення оптимізованого продакшн-білду |
-| `npm run preview` | Перегляд продакшн-білду локально |
-| `npm run typecheck` | Перевірка TypeScript типів |
-
-## 📁 Структура проєкту
+### 🔧 Крок 2: Застосуйте виправлення
 
 ```
-├── src/
-│   ├── components/
-│   │   ├── ConsoleFeed.tsx      # Консольний фід подій
-│   │   ├── FlowDiagram.tsx      # Діаграма потоків
-│   │   └── ui.tsx               # UI компоненти
-│   ├── data/
-│   │   └── dossier.ts           # Дані досьє
-│   ├── App.tsx                  # Головний компонент
-│   ├── index.css                # Стилі (Tailwind)
-│   └── main.tsx                 # Точка входу
-├── index.html                   # HTML шаблон
-├── package.json                 # Залежності та скрипти
-├── tsconfig.json                # TypeScript конфігурація
-└── vite.config.js               # Vite конфігурація
+Права кнопка на install.bat → "Запуск від імені адміністратора"
 ```
 
-## 🔧 Технології
+Інсталятор автоматично:
+- ✅ Видалить `Updater.exe`
+- ✅ Заблокує startup banner
+- ✅ Заблокує license validation
+- ✅ Створить ярлик на робочому столі
 
-- **React 18** - UI бібліотека
-- **TypeScript** - Типізація
-- **Vite** - Build інструмент
-- **Tailwind CSS 4** - Стилі
-- **Framer Motion** - Анімації
-- **Lucide React** - Іконки
-- **Recharts** - Графіки
+### 🚀 Крок 3: Запустіть програму
 
-## 📊 Розмір білду
+Після встановлення запустіть `InstAccountsManager.exe` або використайте ярлик.
 
-- **JavaScript**: ~202 kB (gzip: ~65 kB)
-- **CSS**: ~36 kB (gzip: ~8 kB)
-- **HTML**: ~1 kB
+---
 
-## 🎯 Що це?
+## 📦 Що включено в цей репозиторій
 
-Це веб-сторінка з результатами розслідування InstAccountsManager, яка містить:
+### Скрипти виправлення:
+| Файл | Опис |
+|------|------|
+| `install.bat` | 🎯 **Головний інсталятор** - застосовує всі виправлення |
+| `apply_fix.bat` | Альтернативний скрипт виправлення |
+| `revert_fix.bat` | Відкат всіх змін |
+| `check_connections.bat` | Перевірка мережевих з'єднань |
+| `apply_fix.ps1` | PowerShell версія (детальна) |
+| `monitor_network.ps1` | Монітор мережі |
 
-- Архітектурний аналіз
-- Матрицю функцій
-- Реєстр root causes
-- План відлагодження
-- Інтерактивну діаграму потоків
+### Документація:
+| Файл | Опис |
+|------|------|
+| `README.md` | Цей файл - головна документація |
+| `README_INSTALL.md` | Детальні інструкції по встановленню |
+| `README_FIX.md` | Документація по скриптах виправлення |
+| `PATCH_REPORT.md` | Звіт про знайдені проблеми |
+| `FIX_INSTRUCTIONS.md` | Технічні інструкції |
+| `DOWNLOAD_REQUIRED.txt` | Список файлів які потрібно завантажити |
 
-## 📝 Примітки
+---
 
-- Всі зміни застосовані локально
-- Для синхронізації з GitHub потрібно виконати `git push`
-- Програма не містить блокувань від ліцензування
-- Всі функціональні компоненти працюють коректно
+## 🔧 Що роблять виправлення
+
+### D-01: Видалення Auto-Update
+- ❌ Видаляє `Updater.exe`
+- ❌ Блокує хости оновлень через `hosts`
+- **Результат:** Програма більше не намагається оновлюватися
+
+### D-02: Блокування Startup Banner
+- ❌ Блокує `banner.instaccountsmanager.com`
+- ❌ Блокує `news.instaccountsmanager.com`
+- ❌ Блокує `popup.instaccountsmanager.com`
+- **Результат:** Програма запускається без банерів
+
+### D-03: Обхід License Validation
+- ❌ Блокує `license.instaccountsmanager.com`
+- ❌ Блокує `api.instaccountsmanager.com`
+- ❌ Блокує `auth.instaccountsmanager.com`
+- ❌ Блокує порт 49153 через firewall
+- **Результат:** Програма працює без license перевірок
+
+---
+
+## 📁 Структура файлів
+
+### Файли які потрібно завантажити з оригінального репозиторію:
+
+```
+InstAccountsManager.exe     ← Головна програма
+Antigate.dll                ← CAPTCHA solver
+ChilkatDotNet45.dll         ← HTTP client
+DotNetZip.dll               ← ZIP архівація
+GMap.NET.Core.dll           ← Карти
+GMap.NET.WindowsForms.dll   ← UI для карт
+MailBee.NET.dll             ← Email клієнт
+NAudio.dll                  ← Аудіо обробка
+Newtonsoft.Json.dll         ← JSON парсер
+Pector.dll                  ← Image processing
+Rucaptcha.dll               ← CAPTCHA solver
+System.Data.SQLite.dll      ← База даних
+VipsBundle.dll              ← Image processing
+WebDriver.dll               ← Browser automation
+WebDriver.Support.dll       ← Browser automation support
+xNet.dll                    ← Network library
+chromedriver.exe            ← Chrome driver
+ffmpeg.exe                  ← Video processing
+ffprobe.exe                 ← Video probing
+hevcenc.exe                 ← HEVC encoder
+sqlite3.exe                 ← SQLite CLI
+libglib-2.0-0.dll           ← GLib library
+libgobject-2.0-0.dll        ← GObject library
+libvips-42.dll              ← VIPS library
+```
+
+### Папки які потрібно завантажити:
+
+```
+cfg/                        ← Налаштування програми
+DataBases/                  ← Бази даних
+IG_PROFILES/                ← Профілі Instagram
+PerfectBrowser/             ← Browser data
+extension/                  ← Browser extension
+fonts/                      ← Шрифти
+images/                     ← Зображення
+langs/                      ← Мовні файли
+language/                   ← Мовні файли (alt)
+audio/                      ← Аудіо файли
+tasks/                      ← Завдання
+tasksOrder/                 ← Порядок завдань
+x64/                        ← 64-bit libraries
+x86/                        ← 32-bit libraries
+```
+
+### Файли які МОЖНА видалити (не впливають на роботу):
+
+```
+❌ Updater.exe              ← Видаляється автоматично (D-01)
+❌ Application_Exceptions.txt
+❌ IMAP.txt
+❌ LastChanges.txt
+❌ Proxies.txt
+❌ Proxies_For_Check.txt
+❌ SmsActivateMailTransactionIDs.txt
+❌ UserAgents.txt
+❌ UserAgentsAPI.txt
+❌ log2.txt
+❌ serverLog.txt
+❌ Perfect
+❌ __-__
+```
+
+---
+
+## 🔄 Відкат змін
+
+Якщо щось пішло не так:
+
+```
+Права кнопка на revert_fix.bat → "Запуск від імені адміністратора"
+```
+
+Відкат:
+- ✅ Відновить `hosts` файл
+- ✅ Відновить `Updater.exe` (якщо є backup)
+- ✅ Видалить firewall правила
+
+---
+
+## ❓ Часті питання
+
+### Q: Де взяти оригінальні файли?
+**A:** Завантажте з https://github.com/leonuo/InstAccountsManager
+
+### Q: Чи працюватиме програма без ліцензії?
+**A:** Так, після застосування виправлень license validation блокується.
+
+### Q: Чи можу я оновлювати програму?
+**A:** Ні, Updater.exe видалено. Завантажте нову версію вручну.
+
+### Q: Що робити якщо програма не запускається?
+**A:** 
+1. Перевірте чи всі .dll файли на місці
+2. Запустіть від імені адміністратора
+3. Перевірте antivirus
+4. Спробуйте `revert_fix.bat` → `install.bat`
+
+---
+
+## 📊 Статус
+
+| Компонент | Статус |
+|-----------|--------|
+| Auto-update | ❌ ВИДАЛЕНО |
+| Startup banner | ❌ ЗАБЛОКОВАНО |
+| License validation | ❌ ЗАБЛОКОВАНО |
+| Програма | ✅ ПРАЦЮЄ |
+
+---
+
+## 🆘 Підтримка
+
+Якщо виникли проблеми:
+
+1. Перевірте чи всі файли з оригінального репозиторію на місці
+2. Запустіть `install.bat` від імені адміністратора
+3. Перевірте firewall та antivirus
+4. Спробуйте `revert_fix.bat` для відкату
+
+---
+
+**Версія:** 3.4.4.6 (Fixed)  
+**Останнє оновлення:** 2026-09-07  
+**Статус:** ✅ Готово до встановлення

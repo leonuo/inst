@@ -1,0 +1,64 @@
+# ⚠️ ВАЖЛИВО: Цей файл потрібно завантажити!
+
+Цей репозиторій містить **тільки скрипти виправлення**, але НЕ містить оригінальні бінарні файли.
+
+## 📥 Що потрібно завантажити:
+
+Завантажте **InstAccountsManager.exe** з оригінального репозиторію:
+👉 https://github.com/leonuo/InstAccountsManager
+
+## 📋 Необхідні файли:
+
+### Головні:
+- `InstAccountsManager.exe` ← Головна програма
+
+### DLL бібліотеки:
+- `Antigate.dll`
+- `ChilkatDotNet45.dll`
+- `DotNetZip.dll`
+- `GMap.NET.Core.dll`
+- `GMap.NET.WindowsForms.dll`
+- `MailBee.NET.dll`
+- `NAudio.dll`
+- `Newtonsoft.Json.dll`
+- `Pector.dll`
+- `Rucaptcha.dll`
+- `System.Data.SQLite.dll`
+- `VipsBundle.dll`
+- `WebDriver.dll`
+- `WebDriver.Support.dll`
+- `xNet.dll`
+- `libglib-2.0-0.dll`
+- `libgobject-2.0-0.dll`
+- `libvips-42.dll`
+
+### Executable драйвери:
+- `chromedriver.exe`
+- `ffmpeg.exe`
+- `ffprobe.exe`
+- `hevcenc.exe`
+- `sqlite3.exe`
+
+### Папки:
+- `cfg/`
+- `DataBases/`
+- `IG_PROFILES/`
+- `PerfectBrowser/`
+- `extension/`
+- `fonts/`
+- `images/`
+- `langs/`
+- `language/`
+- `audio/`
+- `tasks/`
+- `tasksOrder/`
+- `x64/`
+- `x86/`
+
+## 🚀 Після завантаження:
+
+1. Скопіюйте всі файли в цю папку
+2. Запустіть `install.bat` від імені адміністратора
+3. Програма готова до використання!
+
+Детальні інструкції: `README_INSTALL.md`
